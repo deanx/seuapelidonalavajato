@@ -37,6 +37,7 @@ func main() {
 
 func list(w http.ResponseWriter, r *http.Request) {
 	db := connect()
+	defer db.Close();
 	rows, err := db.Query("select * from apelidos")
 	errorCheck(err, "Error during query ")
 
@@ -59,6 +60,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 
 func getOne(w http.ResponseWriter, r *http.Request) {
 	db := connect()
+	defer db.Close();
 	var apelido string
 	db.QueryRow("select apelido from apelidos order by rand() limit 1").Scan(&apelido)
 
@@ -70,6 +72,7 @@ func getOne(w http.ResponseWriter, r *http.Request) {
 
 func getPhase(w http.ResponseWriter, r *http.Request) {
 	db := connect()
+	defer db.Close();
 	var phase string
 	db.QueryRow("select nome from fases order by rand() limit 1").Scan(&phase)
 
@@ -87,7 +90,7 @@ func post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db := connect()
-
+	defer db.Close();
 	body, err := ioutil.ReadAll(r.Body)
 	errorCheck(err)
 
