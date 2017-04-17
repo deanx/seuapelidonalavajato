@@ -22,6 +22,7 @@ func main() {
 	router.HandleFunc("/all", list).Methods("GET")
 	router.HandleFunc("/add", post).Methods("POST", "OPTIONS")
 	router.HandleFunc("/apelido", getOne).Methods("GET")
+	router.HandleFunc("/fase", getPhase).Methods("GET")
 
 	http.Handle("/", router)
 
@@ -65,6 +66,16 @@ func getOne(w http.ResponseWriter, r *http.Request) {
 	errorCheck(err)
 	w.Write(jsonify)
 
+}
+
+func getPhase(w http.ResponseWriter, r *http.Request) {
+	db := connect()
+	var phase string
+	db.QueryRow("select nome from fases order by rand() limit 1").Scan(&phase)
+
+	jsonify, err := json.Marshal(phase)
+	errorCheck(err)
+	w.Write(jsonify)
 }
 
 func post(w http.ResponseWriter, r *http.Request) {
