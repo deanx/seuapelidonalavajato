@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"encoding/json"
 	"github.com/gorilla/mux"
-
+	"github.com/gorilla/handlers"
 	"io/ioutil"
 )
 
@@ -20,10 +20,18 @@ type apelidoRow struct {
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/", list).Methods("GET")
-	router.HandleFunc("/add", post).Methods("POST")
+	router.HandleFunc("/add", post).Methods("POST", "OPTIONS")
+	router.HandleFunc("/apelido", getOne).Methods("GET")
 
 	http.Handle("/", router)
-	http.ListenAndServe(":8000", nil)
+
+
+	corsMethods := handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"})
+	corsHeaders := handlers.AllowedHeaders([]string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"})
+	corsOrigins := handlers.AllowedOrigins([]string{"*"})
+
+	http.ListenAndServe(":8000", handlers.CORS(corsOrigins, corsMethods, corsHeaders)(router))
+
 }
 
 func list(w http.ResponseWriter, r *http.Request) {
@@ -48,20 +56,29 @@ func list(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonify)
 }
 
+func getOne(w http.ResponseWriter, r *http.Request) {
+	db := connect()
+	var apelido string
+	db.QueryRow("select apelido from apelidos order by rand() limit 1").Scan(&apelido)
+
+	jsonify, err := json.Marshal(apelido)
+	errorCheck(err)
+	w.Write(jsonify)
+
+}
+
 func post(w http.ResponseWriter, r *http.Request) {
+
 	token := r.URL.Query().Get("token")
 	if token != "barazinho" {
 		w.Write([]byte("end game"))
-
 		return
 	}
 
 	db := connect()
 
 	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
+	errorCheck(err)
 
 	var apelido apelidoRow
 	json.Unmarshal(body, &apelido)
