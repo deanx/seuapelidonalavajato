@@ -19,7 +19,7 @@ type apelidoRow struct {
 
 func main() {
 	router := mux.NewRouter()
-	router.HandleFunc("/", list).Methods("GET")
+	router.HandleFunc("/all", list).Methods("GET")
 	router.HandleFunc("/add", post).Methods("POST", "OPTIONS")
 	router.HandleFunc("/apelido", getOne).Methods("GET")
 
@@ -92,7 +92,7 @@ func post(w http.ResponseWriter, r *http.Request) {
 }
 
 func connect() *sql.DB{
-	db, err := sql.Open("mysql", "root:barazinho@tcp(34.203.214.226:3306)/apelidos")
+	db, err := sql.Open("mysql", "root:barazinho@tcp(54.174.66.117:3306)/apelidos")
 	if err != nil {
 		log.Fatal("error getting connection: ", err)
 	}
